@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<server description="${project.artifactId}">
+
+    <featureManager>
+        <feature>microProfile-2.2</feature>
+        <feature>jsp-2.3</feature>
+    </featureManager>
+
+    <httpEndpoint id="defaultHttpEndpoint"
+                  host="*"
+                  httpPort="${default.http.port}"
+                  httpsPort="${default.https.port}"/>
+
+    <application name="${applicationName}" location="${application}" contextRoot="${app.context.root}"/>
+
+    <!--<logging traceSpecification="${log.name}.*=${log.level}"/>-->
+
+    <!-- This is the keystore that will be used by SSL and by JWT. -->
+    <!--<keyStore id="defaultKeyStore" location="public.jks" type="JKS" password="atbash" />-->
+
+
+    <!-- The MP JWT configuration that injects the caller's JWT into a ResourceScoped bean for inspection. -->
+    <!--<mpJwt id="jwtUserConsumer" keyName="theKeyId" audiences="targetService" issuer="https://server.example.com"/>-->
+
+</server>

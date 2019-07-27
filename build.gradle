@@ -1,0 +1,65 @@
+plugins {
+    id "net.wasdev.wlp.gradle.plugins.Liberty" version "2.6.5"
+    id "java"
+    id "war"
+    id "application"
+}
+
+repositories {
+    mavenCentral()
+}
+
+group = "ru.ifmo.ctddev.tenischev.news.publisher"
+version = "1.0"
+mainClassName = "ru.ifmo.ctddev.tenischev.news.publisher.NewsPublisherRestApplication"
+war {
+    archivesBaseName = "NewsPublisher"
+}
+
+dependencies {
+    compile 'javax:javaee-api:7.0'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+    compile "org.eclipse.microprofile:microprofile:2.2"
+    compileOnly("org.projectlombok:lombok:1.18.8")
+    annotationProcessor("org.projectlombok:lombok:1.18.8")
+    testCompile "com.nimbusds:nimbus-jose-jwt:5.7"
+    testCompile "org.apache.cxf:cxf-rt-rs-client:3.0.4"
+    testCompile "org.bouncycastle:bcpkix-jdk15on:1.53"
+}
+
+ext {
+    appName = "${archivesBaseName}"
+    warContext = appName
+    testServerHttpPort = 8080
+    testServerHttpsPort = 8443
+    archiveName = "$archivesBaseName-$version" + ".war"
+}
+
+liberty {
+    serverName = "${appName}"
+    server {
+        name = "${appName}Server"
+        apps = [file("$buildDir/$libsDirName/$archiveName"), war]
+        stripVersion = true
+        jspVersion = 2.3
+        //dropins = [file("$buildDir/$libsDirName/$archiveName"), war]
+        bootstrapProperties = ['default.http.port': testServerHttpPort,
+                               'default.https.port': testServerHttpsPort,
+                               'app.context.root': warContext,
+                               'applicationName': archivesBaseName,
+                               'application': archiveName]
+        packageLiberty {
+            archive = "$buildDir/${appName}.jar"
+            include = "runnable"
+        }
+    }
+}
+
+
+//war.dependsOn 'compileJSP'
+installApps.dependsOn 'war'
+libertyStart.dependsOn 'installApps'
+libertyRun.dependsOn 'installApps'
+
+clean.dependsOn 'libertyStop'
+libertyPackage.dependsOn 'libertyStop'
