@@ -16,7 +16,8 @@
     <!--<logging traceSpecification="${log.name}.*=${log.level}"/>-->
 
     <!-- This is the keystore that will be used by SSL and by JWT. -->
-    <!--<keyStore id="defaultKeyStore" location="public.jks" type="JKS" password="atbash" />-->
+    <quickStartSecurity userName="admin" userPassword="admin"/>
+    <keyStore id="defaultKeyStore" password="Liberty"/>
 
 
     <!-- The MP JWT configuration that injects the caller's JWT into a ResourceScoped bean for inspection. -->

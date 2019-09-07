@@ -18,6 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Timeout;
+import org.eclipse.microprofile.metrics.Counter;
+import org.eclipse.microprofile.metrics.annotation.Metric;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 
 import ru.ifmo.ctddev.tenischev.news.publisher.dto.News;
@@ -30,6 +33,10 @@ import ru.ifmo.ctddev.tenischev.news.publisher.dto.News;
 @Path("/news")
 @Singleton
 public class NewsPublisherController {
+
+    @Inject
+    @Metric(name = "news_counter")
+    private Counter counter;
 
     /**
      * Host name of news-storage.
@@ -70,9 +77,11 @@ public class NewsPublisherController {
      */
     @POST
     @Path("/add")
+    @Timed(name = "timed-request")
     public void mainPage(@FormParam("title") String title, @FormParam("text") String text,
             @FormParam("publisher") String publisher, @FormParam("expiration") String expiration,
             @Context HttpServletRequest request, @Context HttpServletResponse response) {
+        counter.inc();
         String result = publishNews(collectNews(title, text, publisher, expiration));
         buildResponse(result, request, response);
     }
@@ -113,7 +122,7 @@ public class NewsPublisherController {
      */
     private void buildResponse(String responseInfo, HttpServletRequest request, HttpServletResponse response) {
         try {
-            response.sendRedirect("/AdNewsPublisher/index.jsp?response-status=" + responseInfo);
+            response.sendRedirect("/NewsPublisher/index.jsp?response-status=" + responseInfo);
         } catch (IOException e) {
             e.printStackTrace();
         }
