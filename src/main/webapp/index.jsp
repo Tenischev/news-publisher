@@ -8,6 +8,7 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="ru.ifmo.ctddev.tenischev.news.publisher.Constants" %>
+<%@ page import="java.time.LocalDate" %>
 <html>
 <head>
     <title>Hello Page</title>
@@ -18,7 +19,7 @@
         textarea {
             height:400px;
         }
-        input[type=text], textarea {
+        input[type=text], input[type=date], textarea {
             width: 80%;
             padding: 12px 20px;
             margin: 8px 0;
@@ -44,6 +45,13 @@
             color: black;
             text-decoration: underline;
         }
+        .inline-div {
+            display: inline-block;
+            width: 40%;
+        }
+        .inline-div input {
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -52,7 +60,8 @@
     <form action="news-publisher/news/add" method="post">
         <div><input maxlength="<%=Constants.TITLE_MAX_LENGTH%>" required spellcheck="true" type="text" name="title" placeholder="Title"></div>
         <div><textarea maxlength="<%=Constants.TEXT_MAX_LENGTH%>" required spellcheck="true" id="text" name="text" placeholder="Write text of news here..." style="height:200px"></textarea></div>
-        <div><input maxlength="<%=Constants.PUBLISHER_MAX_LENGTH%>" type="text" name="publisher" placeholder="Author"></div>
+        <div class="inline-div"><input maxlength="<%=Constants.PUBLISHER_MAX_LENGTH%>" type="text" name="publisher" placeholder="Author"></div>
+        <div class="inline-div"><input type="date" name="expiration" value="<%= LocalDate.now().plusDays(1) %>" min="<%= LocalDate.now().plusDays(1) %>" max="<%= LocalDate.now().plusMonths(3) %>"></div>
         <div><input type="submit" value="Publish"></div>
     </form>
     <c:if test="${!empty pageContext.request.getParameter('response-status')}">

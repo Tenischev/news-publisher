@@ -11,12 +11,13 @@ ENV http_proxy=http://$host_proxy:$port_proxy \
     HTTPS_PROXY=http://$host_proxy:$port_proxy
 
 COPY build.gradle /home/gradle/build.gradle
-COPY src/ /home/gradle/src/
 
 RUN echo "systemProp.http.proxyHost=$host_proxy" >> gradle.properties && \
     echo "systemProp.http.proxyPort=$port_proxy" >> gradle.properties && \
     echo "systemProp.https.proxyHost=$host_proxy" >> gradle.properties && \
     echo "systemProp.https.proxyPort=$port_proxy" >> gradle.properties
+
+COPY src/ /home/gradle/src/
 
 RUN gradle libertyPackage
 

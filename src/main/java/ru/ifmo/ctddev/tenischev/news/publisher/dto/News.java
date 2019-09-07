@@ -1,5 +1,7 @@
 package ru.ifmo.ctddev.tenischev.news.publisher.dto;
 
+import java.sql.Timestamp;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -25,4 +27,9 @@ public @Data class News {
      * The publisher of news.
      */
     private String publisher;
+
+    /**
+     * Time when news become invalid.
+     */
+    private Timestamp expirationTime;
 }

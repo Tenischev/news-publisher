@@ -3,7 +3,8 @@ package ru.ifmo.ctddev.tenischev.news.publisher;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.faulttolerance.Fallback;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
+
 import ru.ifmo.ctddev.tenischev.news.publisher.dto.News;
 
 /**
@@ -54,30 +56,32 @@ public class NewsPublisherController {
      * Handles request from form by creating the {@link News} object and transmitting to news-storage.
      *
      * @param title
-     *            the title of news
+     *         the title of news
      * @param text
-     *            the text of news
+     *         the text of news
      * @param publisher
-     *            the publisher of news
+     *         the publisher of news
+     * @param expiration
+     *         the expiration time of news
      * @param request
-     *            the request context
+     *         the request context
      * @param response
-     *            the response context
+     *         the response context
      */
     @POST
     @Path("/add")
     public void mainPage(@FormParam("title") String title, @FormParam("text") String text,
-            @FormParam("publisher") String publisher, @Context HttpServletRequest request,
-            @Context HttpServletResponse response) {
-        String result = publishNews(collectNews(title, text, publisher));
+            @FormParam("publisher") String publisher, @FormParam("expiration") String expiration,
+            @Context HttpServletRequest request, @Context HttpServletResponse response) {
+        String result = publishNews(collectNews(title, text, publisher, expiration));
         buildResponse(result, request, response);
     }
 
     /**
      * Transmit news to news-storage.
-     * 
+     *
      * @param news
-     *            the news
+     *         the news
      * @return result of transmitting.
      */
     @Fallback(fallbackMethod = "publisherFallback") // better use FallbackHandler
@@ -85,7 +89,8 @@ public class NewsPublisherController {
     private String publishNews(News news) {
         try {
             URI apiUri = new URI("http://" + newsRepoHost + ":" + newsRepoPort + "/" + newsRepoPath);
-            NewsRepositoryService newsRepositoryService = RestClientBuilder.newBuilder().baseUri(apiUri)
+            NewsRepositoryService newsRepositoryService = RestClientBuilder.newBuilder()
+                    .baseUri(apiUri)
                     .build(NewsRepositoryService.class);
             newsRepositoryService.addNews(news);
         } catch (URISyntaxException e) {
@@ -98,13 +103,13 @@ public class NewsPublisherController {
     /**
      * This methods builds response structure which redirect to main page and uses provided responseInfo as
      * "response-status" header.
-     * 
+     *
      * @param responseInfo
-     *            the result of operation that will be transmitted to user
+     *         the result of operation that will be transmitted to user
      * @param request
-     *            the request context
+     *         the request context
      * @param response
-     *            the response context
+     *         the response context
      */
     private void buildResponse(String responseInfo, HttpServletRequest request, HttpServletResponse response) {
         try {
@@ -116,9 +121,9 @@ public class NewsPublisherController {
 
     /**
      * Fallback method in case of timeout to request of news-storage.
-     * 
+     *
      * @param news
-     *            the news object
+     *         the news object
      * @return reason of fault.
      */
     public String publisherFallback(News news) {
@@ -127,20 +132,22 @@ public class NewsPublisherController {
 
     /**
      * Cuts fields to allowed length and combine into one {@link News} object.
-     * 
+     *
      * @param title
-     *            the title of news
+     *         the title of news
      * @param text
-     *            the text of news
+     *         the text of news
      * @param publisher
-     *            the publisher of news
+     *         the publisher of news
+     * @param expiration
+     *         the expiration time of news
      * @return the news object
      */
-    private News collectNews(String title, String text, String publisher) {
+    private News collectNews(String title, String text, String publisher, String expiration) {
         title = StringUtils.left(title, Constants.TITLE_MAX_LENGTH);
         text = StringUtils.left(text, Constants.TEXT_MAX_LENGTH);
         publisher = StringUtils.left(publisher, Constants.PUBLISHER_MAX_LENGTH);
-
-        return News.builder().topic(title).text(text).publisher(publisher).build();
+        LocalDate expirationDate = LocalDate.parse(expiration);
+        return News.builder().topic(title).text(text).publisher(publisher).expirationTime(Timestamp.valueOf(expirationDate.atStartOfDay())).build();
     }
 }
