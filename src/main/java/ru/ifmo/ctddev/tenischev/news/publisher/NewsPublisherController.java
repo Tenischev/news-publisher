@@ -157,6 +157,15 @@ public class NewsPublisherController {
         text = StringUtils.left(text, Constants.TEXT_MAX_LENGTH);
         publisher = StringUtils.left(publisher, Constants.PUBLISHER_MAX_LENGTH);
         LocalDate expirationDate = LocalDate.parse(expiration);
-        return News.builder().topic(title).text(text).publisher(publisher).expirationTime(Timestamp.valueOf(expirationDate.atStartOfDay())).build();
+        if (expirationDate.isBefore(LocalDate.now().plusDays(1)) ||
+                expirationDate.isAfter(LocalDate.now().plusMonths(3))) {
+            expirationDate = LocalDate.now().plusDays(1);
+        }
+        return News.builder()
+                .topic(title)
+                .text(text)
+                .publisher(publisher)
+                .expirationTime(Timestamp.valueOf(expirationDate.atStartOfDay()))
+                .build();
     }
 }

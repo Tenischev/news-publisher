@@ -6,12 +6,15 @@ plugins {
 }
 
 repositories {
+    jcenter()
     mavenCentral()
 }
 
 group = "ru.ifmo.ctddev.tenischev.news.publisher"
 version = "1.0"
 mainClassName = "ru.ifmo.ctddev.tenischev.news.publisher.NewsPublisherRestApplication"
+def cucumberVersion = '4.7.1'
+def junitVersion = '5.5.0'
 war {
     archivesBaseName = "NewsPublisher"
 }
@@ -25,6 +28,13 @@ dependencies {
     testCompile "com.nimbusds:nimbus-jose-jwt:5.7"
     testCompile "org.apache.cxf:cxf-rt-rs-client:3.0.4"
     testCompile "org.bouncycastle:bcpkix-jdk15on:1.53"
+
+    testImplementation "io.cucumber:cucumber-java8:${cucumberVersion}"
+    testImplementation "io.cucumber:cucumber-junit:${cucumberVersion}"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
+    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${junitVersion}"
 }
 
 ext {
@@ -63,3 +73,7 @@ libertyRun.dependsOn 'installApps'
 
 clean.dependsOn 'libertyStop'
 libertyPackage.dependsOn 'libertyStop'
+
+test {
+    useJUnitPlatform()
+}
